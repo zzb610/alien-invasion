@@ -11,7 +11,7 @@ class Flash():
         self.screen = screen
 
         # load image
-        self.image = pygame.image.load('images/flash.png')
+        self.image = pygame.image.load('images/flash.bmp')
         self.rect = self.image.get_rect()
         self.screen_rect = self.screen.get_rect()
 
