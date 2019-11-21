@@ -29,7 +29,7 @@ def check_keyup_event(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, ship, bullets):
+def check_events(ai_settings, screen, stats, play_button, ship, aliens, bullets):
     """
     response to button and mouse events
     """
@@ -37,6 +37,10 @@ def check_events(ai_settings, screen, ship, bullets):
         if event.type == pygame.QUIT:
             sys.exit()
 
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            check_play_button(ai_settings, screen, stats, play_button,
+                              ship, aliens, bullets, mouse_x, mouse_y)
         elif event.type == pygame.KEYDOWN:
             check_keydown_events(event, ai_settings, screen, ship, bullets)
 
@@ -44,7 +48,27 @@ def check_events(ai_settings, screen, ship, bullets):
             check_keyup_event(event, ship)
 
 
-def update_sreen(ai_settings, screen, flash, ship, aliens, bullets):
+def check_play_button(ai_settings, screen, stats, play_button, ship, aliens, bullets, mouse_x, mouse_y):
+    """
+    Click the button to start the game
+    """
+    button_cliked = play_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_cliked and not stats.game_active:
+        ai_settings.initialize_dynamic_settings()
+        # hide mouse
+        pygame.mouse.set_visible(False)
+
+        stats.reset_stats()
+        stats.game_active = True
+
+        aliens.empty()
+        bullets.empty()
+
+        create_fleet(ai_settings, screen, ship, aliens)
+        ship.center_ship()
+
+
+def update_sreen(ai_settings, stats, screen, flash, ship, aliens, bullets, play_button):
     """
     update screen
     """
@@ -54,6 +78,8 @@ def update_sreen(ai_settings, screen, flash, ship, aliens, bullets):
         bullet.draw_bullet()
     ship.blitme()
     aliens.draw(screen)
+    if not stats.game_active:
+        play_button.draw_button()
     # draw whole picture
     pygame.display.flip()
 
@@ -82,6 +108,7 @@ def check_bullet_alien_collision(ai_settings, screen, ship, aliens, bullets):
     # create a new group of aliens
     if len(aliens) == 0:
         bullets.empty()
+        ai_settings.increase_speed()
         create_fleet(ai_settings, screen, ship, aliens)
 
 
@@ -121,7 +148,7 @@ def get_number_rows(ai_settings, ship_height, alien_height):
     """
     calculate how the number of lines the screen can contains
     """
-    available_y = ai_settings.screen_height - 4 * alien_height - ship_height
+    available_y = ai_settings.screen_height - 5 * alien_height - 3*ship_height
     row_number = int(available_y / (2*alien_height))
     return row_number
 
@@ -167,7 +194,7 @@ def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
     """
     response to collision between ship and aliens
     """
-    if stats.ship_left >0:
+    if stats.ship_left > 0:
         stats.ship_left -= 1
 
         aliens.empty()
@@ -180,6 +207,7 @@ def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
         sleep(0.5)
     else:
         stats.game_active = False
+        pygame.mouse.set_visible(True)
 
 
 def check_fleet_edges(ai_settings, aliens):

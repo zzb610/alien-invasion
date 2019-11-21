@@ -6,6 +6,7 @@ from ship import Ship
 from flash import Flash
 from bullet import Bullet
 from game_stats import GameStats
+from button import Button
 import game_functions as gf
 
 
@@ -27,14 +28,18 @@ def run_game():
     gf.create_fleet(ai_settings, screen, ship, aliens)
     # create a GameStat
     stats = GameStats(ai_settings)
+    # create a play buttom
+    play_button = Button(ai_settings, screen, 'Play')
 
     while(True):
-        gf.check_events(ai_settings, screen, ship, bullets)
+        gf.check_events(ai_settings, screen, stats,
+                        play_button, ship, aliens, bullets)
         if stats.game_active:
             ship.update()
             gf.update_bullets(ai_settings, screen, ship, aliens, bullets)
             gf.update_aliens(ai_settings, stats, screen, ship, aliens, bullets)
-        gf.update_sreen(ai_settings, screen, flash, ship, aliens, bullets)
+        gf.update_sreen(ai_settings, stats, screen, flash, ship,
+                        aliens, bullets, play_button)
 
 
 if __name__ == "__main__":
